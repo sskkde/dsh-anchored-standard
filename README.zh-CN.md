@@ -106,6 +106,25 @@ npm test
 - preset 与 shell 访问具有相同信任等级，安装前应自行审阅文件；
 - 插件不会发起网络请求，也不增加遥测。
 
+## 计划模式保留其行为政策（动态 complete persona）
+
+Minimal 对齐的完整 system prompt（`complete: true`）会静默丢弃 `dsh-plan-mode`
+注册的 `plan:policy` 段落——`dsh-system-prompt` 在装配 waterfall **之后**把有效
+complete 段落恢复为唯一提示词段落，因此与 complete persona 并存的计划模式段落永远
+到不了模型。计划模式会保留机制（状态机、`/plan` 命令、`exit_plan_mode` 审查）但失去
+行为纪律：模型不会被告知"命令式语言意味着**规划**而非执行"、"必须先探索"、
+"`exit_plan_mode` 是唯一出口"。
+
+`anchored-persona.mjs` 通过让 complete persona 本身**有状态**来修复：其 `text` 是
+持久会话日志的函数——计划模式激活时 persona 为 `base` + 计划政策，否则与 Minimal
+persona 逐字节一致。由此：
+
+- 非计划模式的提示词（及其 KV 缓存前缀）与 Minimal 条件完全一致；
+- 进入/退出计划模式时系统提示词各变化一次——与官方标准模式为其计划段落付出的
+  KV 前缀代价相同；
+- 请保持下方 `planSection` 配置与 `plan-mode` 行的 `section` 同步；后者因
+  `dsh-plan-mode` 的非空校验而保留（在本 preset 下它永远不会到达模型）。
+
 ## Zero-Anchored Standard（实验）
 
 这是不改变上面 Anchored Standard 逻辑的额外测试模式。它沿用同一套 Minimal

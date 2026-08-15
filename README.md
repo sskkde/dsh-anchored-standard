@@ -121,6 +121,32 @@ npm test
   installation.
 - The plugin performs no network requests and adds no telemetry.
 
+## Plan mode keeps its policy (dynamic complete persona)
+
+The Minimal-aligned complete system prompt (`complete: true`) would otherwise
+silently discard the `plan:policy` section that `dsh-plan-mode` registers —
+`dsh-system-prompt` restores the effective complete section as the sole prompt
+section *after* the assembly waterfall, so a plan-mode section registered
+alongside a complete persona never reaches the model. Plan mode would keep its
+mechanism (state machine, `/plan` command, `exit_plan_mode` review) but lose
+its behavioral discipline: the model would not be told that imperative
+language means *planning*, that exploration must come first, or that
+`exit_plan_mode` is the only way out.
+
+`anchored-persona.mjs` fixes this by making the complete persona itself
+stateful: its `text` is a function of the durable session log, so while plan
+mode is active the persona is `base` + the plan policy, and otherwise it is
+byte-identical to the Minimal persona. Consequences:
+
+- Non-plan-mode prompts (and their KV-cache prefix) are unchanged from the
+  Minimal condition.
+- Entering or leaving plan mode changes the system prompt once per switch —
+  the same KV-prefix cost the official Standard preset already pays for its
+  plan section.
+- Keep the `planSection` config below in sync with the `plan-mode` row's
+  `section`; the latter stays non-empty only because `dsh-plan-mode` validates
+  it (it never reaches the model under this preset).
+
 ## Zero-Anchored Standard (experimental)
 
 An extra test mode that does not change the Anchored Standard logic above. It
