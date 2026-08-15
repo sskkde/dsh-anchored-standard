@@ -75,6 +75,14 @@ test('composition: persona uses the dynamic complete plugin', () => {
   assert.ok(!COMPOSITION.includes("name: '@deepseek-ai/dsh-persona'"), 'no static dsh-persona row')
 })
 
+test('composition: persona base is the Minimal text (trajectory condition)', () => {
+  assert.match(COMPOSITION, /text: You are a helpful software engineer assistant\./)
+  // The Cordis authoring identity is NOT in the persona: it would change the
+  // first-request trajectory the bootstrap exists to anchor. The authoring
+  // skills travel with the preset and load through tool-skill after promotion.
+  assert.ok(!COMPOSITION.includes('Two planes decide where an edit belongs'), 'no Cordis identity prose in the persona')
+})
+
 test('composition: bootstrap carries the full anchored config', () => {
   assert.match(COMPOSITION, /shellTools: \[bash, pwsh\]/)
   assert.match(COMPOSITION, /commonTools: \[read\]/)

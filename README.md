@@ -153,15 +153,18 @@ The same Anchored treatment applied to the official 创造模式 (Cordis) preset
 instead of Standard. Everything the shipped Cordis preset ships is here
 unchanged — the self-referential `tool-cordis` toolset, the
 `cordis-plugin-development` and `editing-cordis-compositions` skills under
-`skills/` (resolved via `customSkillDirs`), the authoring persona that says
-which of the two planes an edit belongs to, and the full Standard machinery
+`skills/` (resolved via `customSkillDirs`), and the full Standard machinery
 (plan mode, compaction, delegation, workflows). On top:
 
 1. The persona is the COMPLETE system prompt (`complete: true`,
-   `includeRuntimeContext: false`): the Harness identity, Web orientation, and
-   tool guidance cannot add prompt text. The persona keeps the Cordis
-   authoring identity, so the model still knows how to author presets without
-   the shipped `cordis` preset being mounted.
+   `includeRuntimeContext: false`) and its text is byte-identical to the
+   Minimal preset — the SAME condition the Anchored Standard evaluation
+   measured, so the first-request trajectory evidence carries over. The
+   Cordis authoring identity is deliberately NOT in the persona: a long
+   self-referential prompt on request #1 would change the trajectory the
+   bootstrap exists to anchor, while the skills that actually teach
+   composition authoring travel with this preset and become reachable through
+   `tool-skill` after promotion.
 2. Request #1 is bootstrapped to one native shell plus `read` with the
    `bootstrapMaxTokens` cap; after the first durable promotion signal the full
    catalog — including `tool-cordis` and the skill tools — is exposed.

@@ -130,13 +130,14 @@ persona 逐字节一致。由此：
 把同样的 Anchored 处理应用到官方**创造模式（Cordis）**预设而非标准模式。
 官方 Cordis 预设携带的一切原样保留——自指工具集 `tool-cordis`、
 `cordis-plugin-development` 与 `editing-cordis-compositions` 技能（经
-`customSkillDirs` 解析）、说明"编辑属于哪一层"的创作 persona，以及全套
-Standard 机制（计划模式、压缩、委托、工作流）。在此基础上：
+`customSkillDirs` 解析），以及全套 Standard 机制（计划模式、压缩、委托、
+工作流）。在此基础上：
 
 1. persona 成为**完整 system prompt**（`complete: true`、
-   `includeRuntimeContext: false`）：Harness 身份、Web 导向、工具指导都无法
-   再追加提示词文本。persona 保留 Cordis 创作身份，模型在不挂载随附
-   `cordis` 预设的情况下仍知道如何创作 preset；
+   `includeRuntimeContext: false`），且文本与 Minimal 预设逐字节一致——与
+   Anchored Standard 评测完全相同的条件，首轮轨迹证据可直接沿用。创作身份
+   **有意不放入 persona**：首轮冗长的自指提示词会改变 bootstrap 想要锚定的
+   轨迹，而真正教授组合创作的技能随预设携带，晋升后经 `tool-skill` 即可加载；
 2. 请求 #1 引导为一个平台 shell 加 `read`（带 `bootstrapMaxTokens` 上限）；
    首次持久晋升信号后开放完整目录——包括 `tool-cordis` 与技能工具；
 3. 与 Anchored Standard 相同的动态 complete persona

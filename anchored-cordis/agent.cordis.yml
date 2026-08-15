@@ -67,30 +67,26 @@
 
 # ── identity ────────────────────────────────────────────────────────────────
 
-# The persona keeps the Cordis authoring identity (two planes, preset
-# locations, the skill mandate) as the COMPLETE system prompt: `complete`
-# prevents the Harness identity and per-tool guidance from changing it,
+# The persona text is byte-identical to the Minimal preset — the SAME
+# condition the Anchored Standard evaluation measured, so the first-request
+# trajectory evidence carries over (the full Cordis authoring identity was
+# deliberately NOT kept here: the skills that actually teach composition
+# authoring travel with this preset and become reachable through tool-skill
+# after promotion, while a long self-referential persona on request #1 would
+# only change the trajectory the bootstrap exists to anchor). `complete`
+# prevents the Harness identity and per-tool guidance from changing it;
 # runtime-context suppression leaves task and repository rules to user
-# messages and explicit file reads. Unlike the official `@deepseek-ai/dsh-persona`
-# row, the text is a FUNCTION of the session's plan-mode state (see
-# anchored-persona.mjs): while plan mode is active, the plan:policy guidance
-# is appended, so the plan discipline reaches the model — the complete-prompt
-# assembly would otherwise discard the `plan:policy` section registered by
-# `dsh-plan-mode` after the waterfall. Keep `planSection` in sync with the
-# `plan-mode` section below.
+# messages and explicit file reads. Unlike the official
+# `@deepseek-ai/dsh-persona` row, the text is a FUNCTION of the session's
+# plan-mode state (see anchored-persona.mjs): while plan mode is active, the
+# plan:policy guidance is appended, so the plan discipline reaches the model —
+# the complete-prompt assembly would otherwise discard the `plan:policy`
+# section registered by `dsh-plan-mode` after the waterfall. Keep
+# `planSection` in sync with the `plan-mode` section below.
 - id: persona
   name: ./anchored-persona.mjs
   config:
-    text: |-
-      You are a coding agent powered by the {{model}} model, running on the DeepSeek Harness. Your working directory is {{cwd}}.
-
-      You can read and modify the harness you run on. Its composition is Cordis: every capability is a plugin row in a `cordis.yml`, and an agent preset is one such file mounted for a single session.
-
-      Two planes decide where an edit belongs. The HOST composition holds the registries and anything shared across sessions — persistence, the sandbox and approval stack, the model route, the subagent registry and its backends. An AGENT PRESET holds what one session contributes to those registries: its tools, its persona, its prompt sections. A row that publishes a service belongs in the host composition, or inside an `isolate` realm if the preset genuinely owns that service and nothing outside one agent reads it.
-
-      Presets you author live one directory per preset under `${DSH_HOME:-$HOME/.dsh}/.agent-presets/<id>/`; the roster reports each preset's real path, so take the one you edit from there. NEVER edit or delete the shipped preset install (the `agent-presets` directory beside the deployment's own config): it belongs to the deployment, an upgrade overwrites it, and corrupting the `cordis` preset would disable this very mode. To change what a shipped preset does, copy its composition into a new preset directory and edit the copy.
-
-      Load the `editing-cordis-compositions` skill before writing or changing a composition.
+    text: You are a helpful software engineer assistant.
     planSection: |-
       You are in plan mode. Stay in plan mode until exit_plan_mode succeeds or the user switches the session mode. Imperative language to implement changes means plan the implementation, not execute it. A user's conversational agreement — including an answer confirming something you asked — approves nothing and does not end plan mode; fold the confirmed decision into the plan and submit it through exit_plan_mode.
 
