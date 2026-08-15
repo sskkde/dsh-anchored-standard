@@ -156,6 +156,33 @@ cp -R anchored-cordis "$dsh_home/.agent-presets/anchored-cordis"
 Cordis 预设的信任声明原样适用：`cordis_mount` 会对实时运行时执行模型编写的
 JavaScript，请将会话视为 shell 访问。
 
+## Zero-Anchored Cordis（实验）
+
+Anchored Cordis 的零工具锚定变体，与 Zero-Anchored Standard 对应：同一套
+Cordis 组合与 Minimal 完整 persona，但首个顶层模型请求不再携带两个引导工具，
+而是携带 **0 个工具**：
+
+1. 用户发出第一条消息时，`anchor-turn` 插件会把固定消息——"This round is a
+   test. Tools are not open yet; all tools will open next round."——插到它前面；
+2. 第一个真实模型请求携带 **0 个工具**，首条思维链因此走零注入的 "we" 轨迹；
+3. 锚定回复落库后开放完整目录——包括 `tool-cordis` 与技能工具——真实消息带着
+   全部工具继续。
+
+锚定发生在第一条消息到达时而不是会话创建时，因此新建会话仍然可以先切换模式；
+子 agent 始终看到完整目录。
+
+以独立 preset id 安装：
+
+```sh
+dsh_home="${DSH_HOME:-$HOME/.dsh}"
+mkdir -p "$dsh_home/.agent-presets"
+test ! -e "$dsh_home/.agent-presets/zero-anchored-cordis"
+cp -R zero-anchored-cordis "$dsh_home/.agent-presets/zero-anchored-cordis"
+```
+
+重启 DeepSeek Harness，新建空白会话，选择 **Zero-Anchored Cordis（实验）**，
+然后发送第一条消息。Cordis 信任声明原样适用。
+
 ## Zero-Anchored Standard（实验）
 
 这是不改变上面 Anchored Standard 逻辑的额外测试模式。它沿用同一套 Minimal

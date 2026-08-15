@@ -186,6 +186,37 @@ Cordis (experimental)**. The trust statement of the Cordis preset applies
 unchanged: `cordis_mount` evaluates model-written JavaScript against the live
 runtime, so treat the session as shell access.
 
+## Zero-Anchored Cordis (experimental)
+
+The zero-tool anchor variant of Anchored Cordis, mirroring Zero-Anchored
+Standard: same Cordis composition and Minimal complete persona, but instead of
+two bootstrap tools the first top-level model request carries ZERO tools:
+
+1. When the user sends their first message, the `anchor-turn` plugin prepends a
+   fixed user message — "This round is a test. Tools are not open yet; all
+   tools will open next round." — ahead of it.
+2. The first real model request carries ZERO tools, so the session's first
+   reasoning chain follows the zero-injection "we" trajectory.
+3. Once that anchor response is durable, the full catalog — including
+   `tool-cordis` and the skill tools — is exposed and the real message
+   proceeds with all tools.
+
+Anchoring on the first message — not on session creation — keeps the
+blank-session preset switcher usable. Subagents always see the full catalog.
+
+Install as a separate preset id:
+
+```sh
+dsh_home="${DSH_HOME:-$HOME/.dsh}"
+mkdir -p "$dsh_home/.agent-presets"
+test ! -e "$dsh_home/.agent-presets/zero-anchored-cordis"
+cp -R zero-anchored-cordis "$dsh_home/.agent-presets/zero-anchored-cordis"
+```
+
+Restart DeepSeek Harness, create a blank session, select **Zero-Anchored
+Cordis (experimental)**, then send your first message. The Cordis trust
+statement applies unchanged.
+
 ## Zero-Anchored Standard (experimental)
 
 An extra test mode that does not change the Anchored Standard logic above. It
