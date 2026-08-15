@@ -125,6 +125,36 @@ persona 逐字节一致。由此：
 - 请保持下方 `planSection` 配置与 `plan-mode` 行的 `section` 同步；后者因
   `dsh-plan-mode` 的非空校验而保留（在本 preset 下它永远不会到达模型）。
 
+## Anchored Cordis（实验）
+
+把同样的 Anchored 处理应用到官方**创造模式（Cordis）**预设而非标准模式。
+官方 Cordis 预设携带的一切原样保留——自指工具集 `tool-cordis`、
+`cordis-plugin-development` 与 `editing-cordis-compositions` 技能（经
+`customSkillDirs` 解析）、说明"编辑属于哪一层"的创作 persona，以及全套
+Standard 机制（计划模式、压缩、委托、工作流）。在此基础上：
+
+1. persona 成为**完整 system prompt**（`complete: true`、
+   `includeRuntimeContext: false`）：Harness 身份、Web 导向、工具指导都无法
+   再追加提示词文本。persona 保留 Cordis 创作身份，模型在不挂载随附
+   `cordis` 预设的情况下仍知道如何创作 preset；
+2. 请求 #1 引导为一个平台 shell 加 `read`（带 `bootstrapMaxTokens` 上限）；
+   首次持久晋升信号后开放完整目录——包括 `tool-cordis` 与技能工具；
+3. 与 Anchored Standard 相同的动态 complete persona
+   （`anchored-persona.mjs`）让计划政策在完整提示词下继续生效。
+
+作为独立 preset id 安装：
+
+```sh
+dsh_home="${DSH_HOME:-$HOME/.dsh}"
+mkdir -p "$dsh_home/.agent-presets"
+test ! -e "$dsh_home/.agent-presets/anchored-cordis"
+cp -R anchored-cordis "$dsh_home/.agent-presets/anchored-cordis"
+```
+
+重启 DeepSeek Harness，新建空白会话，选择 **Anchored Cordis（实验）**。
+Cordis 预设的信任声明原样适用：`cordis_mount` 会对实时运行时执行模型编写的
+JavaScript，请将会话视为 shell 访问。
+
 ## Zero-Anchored Standard（实验）
 
 这是不改变上面 Anchored Standard 逻辑的额外测试模式。它沿用同一套 Minimal

@@ -147,6 +147,42 @@ byte-identical to the Minimal persona. Consequences:
   `section`; the latter stays non-empty only because `dsh-plan-mode` validates
   it (it never reaches the model under this preset).
 
+## Anchored Cordis (experimental)
+
+The same Anchored treatment applied to the official 创造模式 (Cordis) preset
+instead of Standard. Everything the shipped Cordis preset ships is here
+unchanged — the self-referential `tool-cordis` toolset, the
+`cordis-plugin-development` and `editing-cordis-compositions` skills under
+`skills/` (resolved via `customSkillDirs`), the authoring persona that says
+which of the two planes an edit belongs to, and the full Standard machinery
+(plan mode, compaction, delegation, workflows). On top:
+
+1. The persona is the COMPLETE system prompt (`complete: true`,
+   `includeRuntimeContext: false`): the Harness identity, Web orientation, and
+   tool guidance cannot add prompt text. The persona keeps the Cordis
+   authoring identity, so the model still knows how to author presets without
+   the shipped `cordis` preset being mounted.
+2. Request #1 is bootstrapped to one native shell plus `read` with the
+   `bootstrapMaxTokens` cap; after the first durable promotion signal the full
+   catalog — including `tool-cordis` and the skill tools — is exposed.
+3. The same dynamic complete persona (`anchored-persona.mjs`) keeps the
+   plan:policy guidance alive under the complete prompt, exactly as in
+   Anchored Standard.
+
+Install as a separate preset id:
+
+```sh
+dsh_home="${DSH_HOME:-$HOME/.dsh}"
+mkdir -p "$dsh_home/.agent-presets"
+test ! -e "$dsh_home/.agent-presets/anchored-cordis"
+cp -R anchored-cordis "$dsh_home/.agent-presets/anchored-cordis"
+```
+
+Restart DeepSeek Harness, create a blank session, and select **Anchored
+Cordis (experimental)**. The trust statement of the Cordis preset applies
+unchanged: `cordis_mount` evaluates model-written JavaScript against the live
+runtime, so treat the session as shell access.
+
 ## Zero-Anchored Standard (experimental)
 
 An extra test mode that does not change the Anchored Standard logic above. It

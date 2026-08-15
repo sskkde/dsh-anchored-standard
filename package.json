@@ -10,6 +10,6 @@
   },
   "scripts": {
     "test": "node --test",
-    "check": "node --check preset/tool-bootstrap.mjs && node --check preset/anchored-persona.mjs && node --test"
+    "check": "node --check preset/tool-bootstrap.mjs && node --check preset/anchored-persona.mjs && node --check anchored-cordis/tool-bootstrap.mjs && node --check anchored-cordis/anchored-persona.mjs && node --test"
   }
 }
