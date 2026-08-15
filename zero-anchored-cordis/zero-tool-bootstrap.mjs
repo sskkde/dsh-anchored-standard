@@ -9,6 +9,16 @@
  * that assistant response is durable, every later request sees the full
  * Standard catalog.
  *
+ * While bootstrapping, first-step workspace reminders are stripped too:
+ * dsh-agent-instructions (AGENTS.md) and dsh-tool-skill (skill catalog)
+ * inject durable user messages through `agent/pre-step`, and without a final
+ * filter the anchor turn would carry them while Minimal mode does not. The
+ * listeners below register with `{ prepend: true }`, which makes this plugin
+ * the OUTERMOST waterfall listener: Cordis runs after-next transforms in
+ * reverse hook order, so only an outermost filter is guaranteed to run after
+ * every other preset row has injected. Row order alone is not a guarantee
+ * because preset rows are started through `Promise.allSettled`.
+ *
  * Robustness:
  *  - Promotion decisions are memoized per session id for this process; the
  *    durable event scan runs once per session per process, then O(1).
@@ -23,6 +33,9 @@ export const name = 'zero-tool-bootstrap'
 
 /** Prompt assembly must exist before this request filter can register. */
 export const inject = ['systemPrompt']
+
+/** First-step injected reminders that must not reach the zero-tool anchor request. */
+const BOOTSTRAP_INJECTED_SOURCE_KINDS = new Set(['skill-catalog', 'agent-instructions'])
 
 /** Register the per-session bootstrap filter. */
 export function apply(ctx) {
@@ -66,5 +79,20 @@ export function apply(ctx) {
       warnOnce(`${name}: bootstrap filter failed, exposing the full catalog: ${String((error && error.message) || error)}`)
       return assembled
     }
-  })
+  }, { prepend: true })
+
+  // Strip first-step injected reminders (skill catalog, AGENTS.md) during
+  // bootstrap. `{ prepend: true }` keeps this filter outermost so its
+  // after-next transform is the final word after every other listener has
+  // injected; without it dsh-agent-instructions can re-add AGENTS.md to the
+  // anchor request.
+  ctx.on('agent/pre-step', async (payload, next) => {
+    const decision = await next()
+    if (decision.kind === 'reject') return decision
+    if (isPromoted(payload.agent)) return decision
+    return {
+      ...decision,
+      messages: decision.messages.filter((message) => !BOOTSTRAP_INJECTED_SOURCE_KINDS.has(message.source?.kind)),
+    }
+  }, { prepend: true })
 }

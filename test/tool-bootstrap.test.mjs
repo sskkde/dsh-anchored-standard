@@ -10,10 +10,12 @@ const config = {
 
 function register(cfg = config) {
   const listeners = {}
+  const options = {}
   const warns = []
   const ctx = {
-    on(event, callback) {
+    on(event, callback, listenerOptions) {
       listeners[event] = callback
+      options[event] = listenerOptions
     },
     logger: {
       warn(message) {
@@ -22,7 +24,7 @@ function register(cfg = config) {
     },
   }
   apply(ctx, cfg)
-  return { listeners, warns }
+  return { listeners, options, warns }
 }
 
 const agent = (events, id = 's') => ({ session: { id, events } })
@@ -41,6 +43,15 @@ function prestep(listener, events, messages, id = 's') {
 
 test('exports a diagnostic plugin name', () => {
   assert.equal(name, 'anchored-tool-bootstrap')
+})
+
+test('every waterfall listener registers with prepend so its after-next runs last', () => {
+  const { options } = register()
+  assert.deepEqual(options, {
+    'system-prompt/assemble': { prepend: true },
+    'agent/request': { prepend: true },
+    'agent/pre-step': { prepend: true },
+  })
 })
 
 test('first request exposes one platform shell and read', async () => {

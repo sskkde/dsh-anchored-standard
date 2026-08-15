@@ -113,6 +113,11 @@ npm test
 - A missing bootstrap tool degrades to the full catalog with a one-time
   warning instead of failing requests, so a composition drift cannot brick a
   session; invalid `promoteOn` values fail at preset mount instead.
+- While bootstrapping, the plugin strips `dsh-agent-instructions` (AGENTS.md)
+  and `dsh-tool-skill` first-step messages so request #1 matches the Minimal
+  condition; both return on request #2. Listeners register with
+  `{ prepend: true }` so the strip remains the final waterfall transform even
+  when another preset row starts first.
 - Promotion decisions are memoized per session for the process lifetime; the
   durable event scan runs once per session per process.
 - The tool catalog changes once, so request-prefix cache continuity also changes

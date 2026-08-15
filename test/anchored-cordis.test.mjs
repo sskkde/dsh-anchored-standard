@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { existsSync, readFileSync } from 'node:fs'
 import test from 'node:test'
 
+import { apply as applyBootstrap } from '../anchored-cordis/tool-bootstrap.mjs'
 import { DEFAULT_BASE, apply, foldPlanMode, name } from '../anchored-cordis/anchored-persona.mjs'
 
 const COMPOSITION = readFileSync(new URL('../anchored-cordis/agent.cordis.yml', import.meta.url), 'utf8')
@@ -33,6 +34,21 @@ function agent(events = []) {
 
 test('anchored-cordis exports the dynamic persona plugin', () => {
   assert.equal(name, 'anchored-persona')
+})
+
+test('anchored-cordis bootstrap registers every waterfall listener with prepend', () => {
+  const options = {}
+  const ctx = {
+    on(event, callback, listenerOptions) {
+      options[event] = listenerOptions
+    },
+  }
+  applyBootstrap(ctx, { commonTools: ['read'], shellTools: ['bash', 'pwsh'] })
+  assert.deepEqual(options, {
+    'system-prompt/assemble': { prepend: true },
+    'agent/request': { prepend: true },
+    'agent/pre-step': { prepend: true },
+  })
 })
 
 test('anchored-cordis: no plan-mode events keeps the base text', async () => {

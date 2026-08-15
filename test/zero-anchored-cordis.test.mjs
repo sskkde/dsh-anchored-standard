@@ -14,6 +14,20 @@ test('zero-anchored-cordis ships the zero-tool plugins', () => {
   assert.equal(typeof applyAnchor, 'function')
 })
 
+test('zero-anchored-cordis bootstrap registers every waterfall listener with prepend', () => {
+  const options = {}
+  applyZero({
+    on(event, callback, listenerOptions) {
+      options[event] = listenerOptions
+    },
+    logger: { warn() {} },
+  })
+  assert.deepEqual(options, {
+    'system-prompt/assemble': { prepend: true },
+    'agent/pre-step': { prepend: true },
+  })
+})
+
 test('composition: zero-tool-bootstrap and anchor-turn rows are present', () => {
   assert.match(COMPOSITION, /- id: zero-tool-bootstrap\n  name: \.\/zero-tool-bootstrap\.mjs/)
   assert.match(COMPOSITION, /- id: anchor-turn\n  name: \.\/anchor-turn\.mjs/)

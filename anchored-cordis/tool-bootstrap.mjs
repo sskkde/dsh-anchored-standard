@@ -31,6 +31,17 @@
  *     the same request reproduces at ~81%. Both message kinds are therefore
  *     stripped during bootstrap and allowed again after promotion.
  *
+ *     The strip must run AFTER every other `agent/pre-step` transform. Cordis
+ *     waterfall after-next transforms execute in reverse hook order, and
+ *     preset rows are started through `Promise.allSettled`, so "first row in
+ *     agent.cordis.yml" is NOT an ordering guarantee — a later-registered
+ *     dsh-agent-instructions can run its after-next after our filter and
+ *     re-insert AGENTS.md (the `agent-instructions` leak seen in real
+ *     sessions). Every listener below therefore registers with
+ *     `{ prepend: true }`, which makes this plugin the OUTERMOST waterfall
+ *     listener and its after-next transform the final word, regardless of
+ *     the order rows happened to start in.
+ *
  * Robustness:
  *  - Promotion decisions are memoized per session id for this process; the
  *    durable event scan runs once per session per process, then O(1).
@@ -46,12 +57,12 @@ export const name = 'anchored-tool-bootstrap'
 
 /**
  * Deliberately NO inject list: the listeners only touch services at event
- * time. Applying without an inject — combined with this row being FIRST in
- * agent.cordis.yml — registers the plugin before dsh-agent-instructions and
- * dsh-tool-skill, and waterfall after-next transforms apply in reverse
- * registration order, so the first-request strip below is the LAST transform.
- * With an inject here those plugins register first and re-inject their
- * messages after the strip.
+ * time, so no dependency can reorder this plugin behind the injectors it
+ * filters. The row still sits FIRST in agent.cordis.yml for readability, but
+ * the actual guarantee is `{ prepend: true }` on every listener below — it
+ * keeps this plugin the outermost waterfall listener even when another preset
+ * row starts first, so its after-next transform always runs last and strips
+ * what dsh-agent-instructions / dsh-tool-skill inject.
  */
 export const inject = []
 
@@ -153,7 +164,7 @@ export function apply(ctx, config) {
       warnOnce(`${name}: bootstrap filter failed, exposing the full catalog: ${String((error && error.message) || error)}`)
       return assembled
     }
-  })
+  }, { prepend: true })
 
   // Cap the first model request's output budget while bootstrapping.
   ctx.on('agent/request', async (payload, next) => {
@@ -173,12 +184,13 @@ export function apply(ctx, config) {
       ...resolved,
       maxTokens: bootstrapMaxTokens,
     }
-  })
+  }, { prepend: true })
 
   // Strip first-step injected reminders (skill catalog, AGENTS.md) during
-  // bootstrap. Because this listener is the first registered (see the inject
-  // note and the row order in agent.cordis.yml), the strip is the final
-  // waterfall transform and actually removes what later listeners inject.
+  // bootstrap. `{ prepend: true }` makes this listener the OUTERMOST waterfall
+  // listener, so its after-next filter runs after every other listener has
+  // added or re-added messages; without it the strip races with the rows it
+  // filters and AGENTS.md can survive request #1.
   ctx.on('agent/pre-step', async (payload, next) => {
     const decision = await next()
     if (decision.kind === 'reject') return decision
@@ -188,5 +200,5 @@ export function apply(ctx, config) {
       ...decision,
       messages: decision.messages.filter((message) => !BOOTSTRAP_INJECTED_SOURCE_KINDS.has(message.source?.kind)),
     }
-  })
+  }, { prepend: true })
 }

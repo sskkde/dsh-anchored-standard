@@ -101,6 +101,10 @@ npm test
 - 工具执行即使失败，只要 `tool/call` 已持久化，下一步仍会晋升；
 - bootstrap 工具缺失时降级为完整目录并一次性告警，不再让请求失败，组合漂移不会锁死
   会话；非法的 `promoteOn` 值会在 preset 挂载时报错；
+- bootstrap 阶段会剥离 `dsh-agent-instructions`（AGENTS.md）与 `dsh-tool-skill`
+  注入到首步的消息，使请求 #1 与 Minimal 条件一致；请求 #2 起两者恢复。监听器使用
+  `{ prepend: true }` 注册，确保即使其他 preset row 先启动，过滤仍是 waterfall
+  的最终 transform。
 - 晋升判定按会话在进程内记忆化，持久事件扫描每会话每进程只执行一次。
 - 工具目录只变化一次，因此第一、第二次请求之间也会发生一次前缀缓存变化；
 - preset 与 shell 访问具有相同信任等级，安装前应自行审阅文件；

@@ -43,12 +43,13 @@
 
 # ── bootstrap (must stay FIRST) ─────────────────────────────────────────────
 
-# This row deliberately sits before every other row: dsh-agent-instructions and
-# dsh-tool-skill inject workspace instructions and the skill catalog into the
-# first request via the agent/pre-step waterfall, and waterfall after-next
-# transforms apply in reverse registration order. Registering first (plus the
-# plugin empty inject list) makes this filter strip the final transform, so
-# request #1 stays Minimal-exact (see anchored-standard issue #6).
+# This row stays FIRST for readability, but row order is not the guarantee:
+# preset rows start through Promise.allSettled, so registration order can race.
+# The actual guarantee is `{ prepend: true }` inside tool-bootstrap.mjs — it
+# keeps this plugin the OUTERMOST agent/pre-step waterfall listener, so its
+# after-next filter runs last and removes the workspace instructions
+# (AGENTS.md) and skill catalog that dsh-agent-instructions / dsh-tool-skill
+# inject into request #1 (see anchored-standard issue #6).
 #
 # V4 Pro conditions strongly on the API tool catalog AND the first request
 # output budget. Bootstrap request #1 with one native shell plus `read` and a
